@@ -87,7 +87,7 @@ def main():
 
                             # Generate parameters
                             args = str(config['locations']['sub_auto_tool'])
-                            args += str("sbsbaker.exe ambient-occlusion-from-mesh") # File
+                            args += str("sbsbaker.exe ambient-occlusion") # File
                             args += ' --inputs "' + str(file_path) +'"' # Mesh files to process. This option is implicit, so you can just provide a list of files at the end of your arguments, they will be interpreted as inputs.
                             args += ' --name-suffix-high ' + str(values['name_suffix_high']) # High Poly name suffix.
                             args += ' --name-suffix-low ' + str(values['name_suffix_low']) # Low Poly name suffix.
