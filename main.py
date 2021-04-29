@@ -92,7 +92,11 @@ def main():
                             args += ' --name-suffix-high ' + str(values['name_suffix_high']) # High Poly name suffix.
                             args += ' --name-suffix-low ' + str(values['name_suffix_low']) # Low Poly name suffix.
                             args += ' --output-format ' + str(values['output_format']) # Format to use for output image file.
-                            args += ' --output-path ' + str(values['output_path']) # Set the output path for the generated files. By default the output path is the current directory.
+
+                            output_path = values['output_path'];
+                            if (output_path == '/'):
+                                output_path = os.path.join(file_path, '..')
+                            args += ' --output-path "' + str(output_path) + '"'# Set the output path for the generated files. By default the output path is the current directory.
 
                             antialiasings = {
                                 'None': 0,
@@ -101,14 +105,14 @@ def main():
                                 'Subsampling 8x8': 3,
                             }
                             antialiasing = antialiasings.get(values['antialiasing'], 0)
-                            args += ' --antialiasing ' + str(antialiasing) # Antialiasing method.
+                            # args += ' --antialiasing ' + str(antialiasing) # Antialiasing method.
 
                             # --apply-diffusion # Whether to use diffusion as a post-process after dilation, or not.
                             # --attenuation # How occlusion is attenuated by occluder distance (0='None', 1='Smooth', 2='Linear')
                             # --average-normals # Compute rays directions based on averaged normals.
 
-                            args += ' --enable-ground-plane ' + str(values['enable_ground_plane']).lower() # If enabled, adds an infinite plane under the baked mesh.
-                            args += ' --ground-offset ' + str(values['ground_offset']) # Offset of the ground plane from the mesh lowest point.
+                            # args += ' --enable-ground-plane ' + str(values['enable_ground_plane']).lower() # If enabled, adds an infinite plane under the baked mesh.
+                            # args += ' --ground-offset ' + str(values['ground_offset']) # Offset of the ground plane from the mesh lowest point.
 
                             resolutions = {
                                 "512": 9,
