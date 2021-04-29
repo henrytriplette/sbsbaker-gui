@@ -12,12 +12,33 @@ def main():
     sg.theme('Topanga')
 
     main_panel = [
-        [sg.Text('Input Folder', size=(15, 1)), sg.Input(key='inputMainPanelMeshFolder'), sg.FolderBrowse(target=(-1, 0))],
+        [sg.Text('Input Folder', size=(15, 1)), sg.Input(key='inputMainPanelMeshFolder'), sg.FolderBrowse(target=('inputMainPanelMeshFolder'))],
 
-        [sg.Text('Flow field PRNG seed (overriding the main --seed)', size=(55, 1)),
-         sg.Slider(range=(0,100), default_value=25, size=(20,15), orientation='horizontal', key="vfi_flow_seed")], # INTEGER
+        # Input and output
+        [sg.Text('Output options.', size=(55, 1))],
 
+        [sg.Text('Output Path', size=(15, 1)), sg.Input(default_text="/", key='output_path'), sg.FolderBrowse(target=('output_path'))],
+
+        [sg.Text('High Poly name suffix', size=(55, 1)),
+         sg.Input(default_text = "_high", size=(20,15), key="name_suffix_high")], # STRING
+
+        [sg.Text('Low Poly name suffix.', size=(55, 1)),
+         sg.Input(default_text = "_low", size=(20,15), key="name_suffix_low")], # STRING
+
+        [sg.Text('Output format', size=(55, 1)),
+         sg.Combo(['surface', 'dds', 'bmp', 'jpg', 'jif', 'jpeg', 'jpe', 'png', 'tga', 'targa', 'tif', 'tiff', 'wap', 'wbmp', 'wbm', 'psd', 'psb', 'hdr', 'exr', 'webp'], default_value='png', size=(15, 1), key="output_format")],
+
+         # ambient-occlusion options
+        [sg.Text('Ambient occlusion options.', size=(55, 1))],
+
+
+
+        [sg.Text('Resolution', size=(55, 1)),
+         sg.Combo(['512', '1024', '2048', '4096'], default_value='1024', size=(15, 1), key="resolution")],
+
+        # Buttons
         [sg.Button('Start processing folder', size=(25, 1), key='utility_RunSbsbaker')],
+
     ]
 
     layout = [
@@ -48,22 +69,25 @@ def main():
         # Vpype Flow Imager
         if event == 'utility_RunSbsbaker':
             if values['inputMainPanelMeshFolder']:
-                outputFile = values['inputMainPanelMeshFolder'][:-3] + '-.svg'
 
-                # Generate parameters
-                args = ''
-                args =+ 'noise_coeff= ' + str(values['vfi_noise_coeff'])
-                args =+ 'n_fields= ' + str(values['vfi_n_fields'])
-                args =+ 'min_sep= ' + str(values['vfi_min_sep'])
-                args =+ 'max_sep= ' + str(values['vfi_max_sep'])
-                args =+ 'max_length= ' + str(values['vfi_max_length'])
-                args =+ 'max_size= ' + str(values['vfi_max_size'])
-                args =+ 'seed= ' + str(values['vfi_seed'])
-                args =+ 'flow_seed= ' + str(values['vfi_flow_seed'])
-                print(args)
-                # subprocess.Popen('vpype flow_img "' + str(values['inputMainPanelMeshFolder']) + '" write "' + str(outputFile) + '"')
+                for root, dirs, files in os.walk(values['inputMainPanelMeshFolder']):
+                    for filename in files:
+                        if filename.lower().endswith(('.fbx')):
+                            print(filename)
+
+                            # Generate parameters
+                            args = config['locations']['sub_auto_tool']
+                            args =+ '\sbsbaker.exe ambient-occlusion' # File
+                            args =+ ' --inputs ' + str(filename) # Mesh files to process. This option is implicit, so you can just provide a list of files at the end of your arguments, they will be interpreted as inputs.
+                            args =+ ' --name-suffix-high ' + str(values['name_suffix_high']) # High Poly name suffix.
+                            args =+ ' --name-suffix-low ' + str(values['name_suffix_low']) # Low Poly name suffix.
+                            args =+ ' --output-format ' + str(values['output_format']) # Format to use for output image file.
+                            args =+ ' --output-path ' + str(values['output_path']) # Set the output path for the generated files. By default the output path is the current directory.
+
+                            print(args)
+                            # subprocess.Popen(args)
             else:
-                sg.popup_error('Please select a valid .jpg file')
+                sg.popup_error('Please select a valid folder')
 
     window.Close()   # Don't forget to close your window!
 
