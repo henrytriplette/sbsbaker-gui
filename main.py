@@ -87,7 +87,7 @@ def main():
 
                             # Generate parameters
                             args = str(config['locations']['sub_auto_tool'])
-                            args += str("sbsbaker.exe ambient-occlusion") # File
+                            args += str("sbsbaker.exe ambient-occlusion-from-mesh") # File
                             args += ' --inputs "' + str(file_path) +'"' # Mesh files to process. This option is implicit, so you can just provide a list of files at the end of your arguments, they will be interpreted as inputs.
                             args += ' --name-suffix-high ' + str(values['name_suffix_high']) # High Poly name suffix.
                             args += ' --name-suffix-low ' + str(values['name_suffix_low']) # Low Poly name suffix.
@@ -111,8 +111,8 @@ def main():
                             # --attenuation # How occlusion is attenuated by occluder distance (0='None', 1='Smooth', 2='Linear')
                             # --average-normals # Compute rays directions based on averaged normals.
 
-                            # args += ' --enable-ground-plane ' + str(values['enable_ground_plane']).lower() # If enabled, adds an infinite plane under the baked mesh.
-                            # args += ' --ground-offset ' + str(values['ground_offset']) # Offset of the ground plane from the mesh lowest point.
+                            args += ' --enable-ground-plane ' + str(values['enable_ground_plane']).lower() # If enabled, adds an infinite plane under the baked mesh.
+                            args += ' --ground-offset ' + str(values['ground_offset']) # Offset of the ground plane from the mesh lowest point.
 
                             resolutions = {
                                 "512": 9,
@@ -125,7 +125,9 @@ def main():
 
                             # --self-occlusion
 
-                            print(args)
+                            args += ' --use-lowdef-as-highdef true' # Skip scene request
+
+                            # print(args)
                             subprocess.Popen(args)
             else:
                 sg.popup_error('Please select a valid folder')
