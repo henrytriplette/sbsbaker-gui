@@ -85,50 +85,76 @@ def main():
 
                             file_path = os.path.join(root, filename)
 
-                            # Generate parameters
+                            # Gather info on the object
                             args = str(config['locations']['sub_auto_tool'])
-                            args += str("sbsbaker.exe ambient-occlusion-from-mesh") # File
-                            args += ' --inputs "' + str(file_path) +'"' # Mesh files to process. This option is implicit, so you can just provide a list of files at the end of your arguments, they will be interpreted as inputs.
-                            args += ' --name-suffix-high ' + str(values['name_suffix_high']) # High Poly name suffix.
-                            args += ' --name-suffix-low ' + str(values['name_suffix_low']) # Low Poly name suffix.
-                            args += ' --output-format ' + str(values['output_format']) # Format to use for output image file.
+                            args += str("sbsbaker.exe info --hide-location --hide-bounding-box ") # File
+                            args += '"' + str(file_path) + '"' # Mesh files to process. This option is implicit, so you can just provide a list of files at the end of your arguments, they will be interpreted as inputs.
 
-                            output_path = values['output_path'];
-                            if (output_path == '/'):
-                                output_path = os.path.join(file_path, '..')
-                            args += ' --output-path "' + str(output_path) + '"'# Set the output path for the generated files. By default the output path is the current directory.
+                            temp = subprocess.Popen(args, stdout = subprocess.PIPE)
 
-                            antialiasings = {
-                                'None': 0,
-                                'Subsampling 2x2': 1,
-                                'Subsampling 4x4': 2,
-                                'Subsampling 8x8': 3,
-                            }
-                            antialiasing = antialiasings.get(values['antialiasing'], 0)
-                            # args += ' --antialiasing ' + str(antialiasing) # Antialiasing method.
+                            # we use the communicate function to fetch the output
+                            output = str(temp.communicate())
 
-                            # --apply-diffusion # Whether to use diffusion as a post-process after dilation, or not.
-                            # --attenuation # How occlusion is attenuated by occluder distance (0='None', 1='Smooth', 2='Linear')
-                            # --average-normals # Compute rays directions based on averaged normals.
+                            # splitting the output so that we can parse them line by line
+                            output = output.split("\\r\\n")
 
-                            args += ' --enable-ground-plane ' + str(values['enable_ground_plane']).lower() # If enabled, adds an infinite plane under the baked mesh.
-                            args += ' --ground-offset ' + str(values['ground_offset']) # Offset of the ground plane from the mesh lowest point.
+                            # a variable to store the output
+                            res = []
 
-                            resolutions = {
-                                "512": 9,
-                                "1024": 10,
-                                "2048": 11,
-                                "4096": 12,
-                            }
-                            resolution = resolutions.get(values['resolution'], 11)
-                            args += ' --output-size ' + str(resolution) + ',' + str(resolution) # Output size of the generated map.<w> and <h> are the exponents of powers of 2 that give the actual width and height.
+                            # iterate through the output line by line
+                            for line in output:
+                                if line.find('Entity') != -1:
+                                    clean_line = line.replace('  Entity "', '').replace('":', '')
+                                    res.append(clean_line)
 
-                            # --self-occlusion
+                            for node in res:
+                                # Generate parameters
+                                args = str(config['locations']['sub_auto_tool'])
+                                args += str("sbsbaker.exe ambient-occlusion-from-mesh") # File
+                                args += ' --inputs "' + str(file_path) +'"' # Mesh files to process. This option is implicit, so you can just provide a list of files at the end of your arguments, they will be interpreted as inputs.
+                                args += ' --name-suffix-high ' + str(values['name_suffix_high']) # High Poly name suffix.
+                                args += ' --name-suffix-low ' + str(values['name_suffix_low']) # Low Poly name suffix.
+                                args += ' --output-format ' + str(values['output_format']) # Format to use for output image file.
 
-                            args += ' --use-lowdef-as-highdef true' # Skip scene request
+                                output_path = values['output_path'];
+                                if (output_path == '/'):
+                                    output_path = os.path.join(file_path, '..')
+                                args += ' --output-path "' + str(output_path) + '"'# Set the output path for the generated files. By default the output path is the current directory.
 
-                            # print(args)
-                            subprocess.Popen(args)
+                                antialiasings = {
+                                    'None': 0,
+                                    'Subsampling 2x2': 1,
+                                    'Subsampling 4x4': 2,
+                                    'Subsampling 8x8': 3,
+                                }
+                                antialiasing = antialiasings.get(values['antialiasing'], 0)
+                                # args += ' --antialiasing ' + str(antialiasing) # Antialiasing method.
+
+                                # --apply-diffusion # Whether to use diffusion as a post-process after dilation, or not.
+                                # --attenuation # How occlusion is attenuated by occluder distance (0='None', 1='Smooth', 2='Linear')
+                                # --average-normals # Compute rays directions based on averaged normals.
+
+                                args += ' --enable-ground-plane ' + str(values['enable_ground_plane']).lower() # If enabled, adds an infinite plane under the baked mesh.
+                                args += ' --ground-offset ' + str(values['ground_offset']) # Offset of the ground plane from the mesh lowest point.
+
+                                resolutions = {
+                                    "512": 9,
+                                    "1024": 10,
+                                    "2048": 11,
+                                    "4096": 12,
+                                }
+                                resolution = resolutions.get(values['resolution'], 11)
+                                args += ' --output-size ' + str(resolution) + ',' + str(resolution) # Output size of the generated map.<w> and <h> are the exponents of powers of 2 that give the actual width and height.
+
+                                # --self-occlusion
+                                args += ' --output-name mat_' + node + '_ambient_occlusion' # Nodename
+                                args += ' --input-selection ' + node # Nodename
+                                args += ' --use-lowdef-as-highdef true' # Skip scene request
+
+                                print('Exported ' + node)
+                                
+                                # print(args)
+                                subprocess.Popen(args)
             else:
                 sg.popup_error('Please select a valid folder')
 
