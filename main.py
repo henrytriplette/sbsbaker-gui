@@ -26,7 +26,7 @@ def main():
          sg.Input(default_text = "_low", size=(20,15), key="name_suffix_low")], # STRING
 
         [sg.Text('Output format', size=(55, 1)),
-         sg.Combo(['surface', 'dds', 'bmp', 'jpg', 'jif', 'jpeg', 'jpe', 'png', 'tga', 'targa', 'tif', 'tiff', 'wap', 'wbmp', 'wbm', 'psd', 'psb', 'hdr', 'exr', 'webp'], default_value='png', size=(15, 1), key="output_format")],
+         sg.Combo(['surface', 'dds', 'bmp', 'jpg', 'jif', 'jpeg', 'jpe', 'png', 'tga', 'targa', 'tif', 'tiff', 'wap', 'wbmp', 'wbm', 'psd', 'psb', 'hdr', 'exr', 'webp'], default_value='jpg', size=(15, 1), key="output_format")],
 
          # ambient-occlusion options
         [sg.Text('                  ', size=(55, 2))],
@@ -61,7 +61,7 @@ def main():
                 [sg.Cancel(key='quit')],
             ]
 
-    window = sg.Window('Sbsbaker Utility', layout)
+    window = sg.Window('Sbsbaker Utility - 0.01 Alpha', layout)
 
 
     while (True):
@@ -152,7 +152,7 @@ def main():
                                 args += ' --use-lowdef-as-highdef true' # Skip scene request
 
                                 print('Exported ' + node)
-                                
+
                                 # print(args)
                                 subprocess.Popen(args)
             else:
