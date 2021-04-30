@@ -14,10 +14,35 @@ def main():
     main_panel = [
         [sg.Text('Input Folder', size=(15, 1)), sg.Input(key='inputMainPanelMeshFolder'), sg.FolderBrowse(target=('inputMainPanelMeshFolder'))],
 
-        # Input and output
-        [sg.Text('# Output options.', size=(55, 2))],
-
         [sg.Text('Output Path', size=(15, 1)), sg.Input(default_text="/", key='output_path'), sg.FolderBrowse(target=('output_path'))],
+
+        # Common Parameters
+        [sg.Text('Common Parameters.', size=(55, 1))],
+
+        [sg.Text('Output Size', size=(55, 1)),
+         sg.Combo(['512', '1024', '2048', '4096'], default_value='1024', size=(15, 1), key="resolution")],
+
+        [sg.Text('Dilation Width', size=(55, 1)),
+         sg.Slider(range=(1,100), default_value=32, size=(20,15), orientation='horizontal', key="dilation_width")], # INTEGER
+
+        [sg.Text('Apply Diffusion', size=(55, 1)),
+         sg.Checkbox('Apply Diffusion', default=False, size=(15, 1), key="apply_diffusion")],
+
+        [sg.Text('Max Frontal Distance', size=(55, 1)),
+         sg.Slider(range=(0,1), default_value=0.01, size=(20,15), orientation='horizontal', key="max_frontal")], # INTEGER
+
+        [sg.Text('Max Rear Distance', size=(55, 1)),
+         sg.Slider(range=(0,1), default_value=0.01, size=(20,15), orientation='horizontal', key="max_rear")], # INTEGER
+
+        [sg.Text('Relative to Bounding Box', size=(55, 1)),
+         sg.Checkbox('Relative to Bounding Box', default=True, size=(15, 1), key="max_dist_relative_scale")],
+
+        [sg.Text('Average Normals', size=(55, 1)),
+         sg.Checkbox('Average Normals', default=True, size=(15, 1), key="average_normals")],
+
+        [sg.Text('Ignore Backface', size=(55, 1)),
+         sg.Checkbox('Ignore Backface', default=True, size=(15, 1), key="ignore_backface")],
+
 
         [sg.Text('High Poly name suffix', size=(55, 1)),
          sg.Input(default_text = "_high", size=(20,15), key="name_suffix_high")], # STRING
@@ -35,8 +60,9 @@ def main():
         [sg.Text('Antialiasing method.', size=(55, 1)),
          sg.Combo(['None', 'Subsampling 2x2', 'Subsampling 4x4', 'Subsampling 8x8'], default_value='None', size=(15, 1), key="antialiasing")],
 
-        [sg.Text('Resolution', size=(55, 1)),
-         sg.Combo(['512', '1024', '2048', '4096'], default_value='1024', size=(15, 1), key="resolution")],
+
+
+
 
         [sg.Text('Enable Floor', size=(55, 1)),
          sg.Checkbox('Enable Floor', default=True, size=(15, 1), key="enable_ground_plane")],
@@ -112,6 +138,24 @@ def main():
                                 args = str(config['locations']['sub_auto_tool'])
                                 args += str("sbsbaker.exe ambient-occlusion-from-mesh") # File
                                 args += ' --inputs "' + str(file_path) +'"' # Mesh files to process. This option is implicit, so you can just provide a list of files at the end of your arguments, they will be interpreted as inputs.
+
+                                resolutions = {
+                                    "512": 9,
+                                    "1024": 10,
+                                    "2048": 11,
+                                    "4096": 12,
+                                }
+                                resolution = resolutions.get(values['resolution'], 11)
+                                args += ' --output-size ' + str(resolution) + ',' + str(resolution) # Output size of the generated map.<w> and <h> are the exponents of powers of 2 that give the actual width and height.
+
+                                args += ' --dilation-width ' + str(int(values['dilation_width'])) # Width of the dilation post-process (in pixels) applied before diffusion.
+                                args += ' --apply-diffusion ' + str(values['apply_diffusion']).lower() # Whether to use diffusion as a post-process after dilation, or not.
+                                args += ' --max-frontal ' + str(values['max_frontal']) # Max frontal distance for raytracing.
+                                args += ' --max-rear ' + str(values['max_rear']) # Max rear distance for raytracing.
+                                args += ' --max-dist-relative-scale ' + str(values['max_dist_relative_scale']).lower() # Interpret the Occluder Distance as a factor of the mesh bounding box.
+                                args += ' --average-normals ' + str(values['average_normals']).lower() # Interpret the Occluder Distance as a factor of the mesh bounding box.
+                                args += ' --ignore-backface ' + str(values['ignore_backface']).lower() # Interpret the Occluder Distance as a factor of the mesh bounding box.
+
                                 args += ' --name-suffix-high ' + str(values['name_suffix_high']) # High Poly name suffix.
                                 args += ' --name-suffix-low ' + str(values['name_suffix_low']) # Low Poly name suffix.
                                 args += ' --output-format ' + str(values['output_format']) # Format to use for output image file.
@@ -128,23 +172,11 @@ def main():
                                     'Subsampling 8x8': 3,
                                 }
                                 antialiasing = antialiasings.get(values['antialiasing'], 0)
-                                # args += ' --antialiasing ' + str(antialiasing) # Antialiasing method.
-
-                                # --apply-diffusion # Whether to use diffusion as a post-process after dilation, or not.
-                                # --attenuation # How occlusion is attenuated by occluder distance (0='None', 1='Smooth', 2='Linear')
-                                # --average-normals # Compute rays directions based on averaged normals.
+                                args += ' --antialiasing ' + str(antialiasing) # Antialiasing method.
 
                                 args += ' --enable-ground-plane ' + str(values['enable_ground_plane']).lower() # If enabled, adds an infinite plane under the baked mesh.
                                 args += ' --ground-offset ' + str(values['ground_offset']) # Offset of the ground plane from the mesh lowest point.
 
-                                resolutions = {
-                                    "512": 9,
-                                    "1024": 10,
-                                    "2048": 11,
-                                    "4096": 12,
-                                }
-                                resolution = resolutions.get(values['resolution'], 11)
-                                args += ' --output-size ' + str(resolution) + ',' + str(resolution) # Output size of the generated map.<w> and <h> are the exponents of powers of 2 that give the actual width and height.
 
                                 # --self-occlusion
                                 args += ' --output-name mat_' + node + '_ambient_occlusion' # Nodename
