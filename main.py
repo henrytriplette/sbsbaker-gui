@@ -16,7 +16,11 @@ def main():
 
         [sg.Text('Output Path', size=(15, 1)), sg.Input(default_text="/", key='output_path'), sg.FolderBrowse(target=('output_path'))],
 
+        [sg.Text('Output format', size=(55, 1)),
+         sg.Combo(['surface', 'dds', 'bmp', 'jpg', 'jif', 'jpeg', 'jpe', 'png', 'tga', 'targa', 'tif', 'tiff', 'wap', 'wbmp', 'wbm', 'psd', 'psb', 'hdr', 'exr', 'webp'], default_value='jpg', size=(15, 1), key="output_format")],
+
         # Common Parameters
+        [sg.Text('                  ', size=(55, 2))],
         [sg.Text('Common Parameters.', size=(55, 1))],
 
         [sg.Text('Output Size', size=(55, 1)),
@@ -29,10 +33,10 @@ def main():
          sg.Checkbox('Apply Diffusion', default=False, size=(15, 1), key="apply_diffusion")],
 
         [sg.Text('Max Frontal Distance', size=(55, 1)),
-         sg.Slider(range=(0,1), default_value=0.01, size=(20,15), orientation='horizontal', key="max_frontal")], # INTEGER
+         sg.Slider(range=(0.00,1.00), resolution=0.01, default_value=0.01, size=(20,15), orientation='horizontal', key="max_frontal")], # INTEGER
 
         [sg.Text('Max Rear Distance', size=(55, 1)),
-         sg.Slider(range=(0,1), default_value=0.01, size=(20,15), orientation='horizontal', key="max_rear")], # INTEGER
+         sg.Slider(range=(0.00,1.00), resolution=0.01, default_value=0.01, size=(20,15), orientation='horizontal', key="max_rear")], # INTEGER
 
         [sg.Text('Relative to Bounding Box', size=(55, 1)),
          sg.Checkbox('Relative to Bounding Box', default=True, size=(15, 1), key="max_dist_relative_scale")],
@@ -43,31 +47,56 @@ def main():
         [sg.Text('Ignore Backface', size=(55, 1)),
          sg.Checkbox('Ignore Backface', default=True, size=(15, 1), key="ignore_backface")],
 
+        [sg.Text('Antialiasing method.', size=(55, 1)),
+         sg.Combo(['None', 'Subsampling 2x2', 'Subsampling 4x4', 'Subsampling 8x8'], default_value='Subsampling 4x4', size=(15, 1), key="antialiasing")],
 
-        [sg.Text('High Poly name suffix', size=(55, 1)),
-         sg.Input(default_text = "_high", size=(20,15), key="name_suffix_high")], # STRING
+        [sg.Text('Match.', size=(55, 1)),
+         sg.Combo(['Always', 'By Mesh Name'], default_value='Always', size=(15, 1), key="match")],
 
         [sg.Text('Low Poly name suffix.', size=(55, 1)),
          sg.Input(default_text = "_low", size=(20,15), key="name_suffix_low")], # STRING
 
-        [sg.Text('Output format', size=(55, 1)),
-         sg.Combo(['surface', 'dds', 'bmp', 'jpg', 'jif', 'jpeg', 'jpe', 'png', 'tga', 'targa', 'tif', 'tiff', 'wap', 'wbmp', 'wbm', 'psd', 'psb', 'hdr', 'exr', 'webp'], default_value='jpg', size=(15, 1), key="output_format")],
+        [sg.Text('High Poly name suffix', size=(55, 1)),
+         sg.Input(default_text = "_high", size=(20,15), key="name_suffix_high")], # STRING
+
+        [sg.Text('Ignore backface suffix', size=(55, 1)),
+         sg.Input(default_text = "_ignorebf", size=(20,15), key="name_suffix_ignore_backface")], # STRING
 
          # ambient-occlusion options
         [sg.Text('                  ', size=(55, 2))],
         [sg.Text('# Ambient occlusion options.', size=(55, 2))],
 
-        [sg.Text('Antialiasing method.', size=(55, 1)),
-         sg.Combo(['None', 'Subsampling 2x2', 'Subsampling 4x4', 'Subsampling 8x8'], default_value='None', size=(15, 1), key="antialiasing")],
+        [sg.Text('Secondary Rays', size=(55, 1)),
+         sg.Slider(range=(1,256), resolution=1, default_value=64, size=(20,15), orientation='horizontal', key="secondary_rays")], # INTEGER
 
+        [sg.Text('Min Occluder Distance', size=(55, 1)),
+         sg.Slider(range=(0.00,1.00), resolution=0.0001, default_value=0.0001, size=(20,15), orientation='horizontal', key="min_occluder_distance")], # INTEGER
 
+        [sg.Text('Max Occluder Distance', size=(55, 1)),
+         sg.Slider(range=(0.00,1.00), resolution=0.01, default_value=1, size=(20,15), orientation='horizontal', key="max_occluder_distance")], # INTEGER
 
+        [sg.Text('Relative to Bounding Box', size=(55, 1)),
+         sg.Checkbox('Relative to Bounding Box', default=True, size=(15, 1), key="relative_to_bbox")],
 
+        [sg.Text('Spread angle', size=(55, 1)),
+         sg.Slider(range=(0,256), resolution=1, default_value=180, size=(20,15), orientation='horizontal', key="spread_angle")], # INTEGER
 
-        [sg.Text('Enable Floor', size=(55, 1)),
+        [sg.Text('Angular Distribution of Occlusion Rays.', size=(55, 1)),
+         sg.Combo(['Uniform', 'Cosine'], default_value='Cosine', size=(15, 1), key="ray_distrib")],
+
+        [sg.Text('Ignore Backface.', size=(55, 1)),
+         sg.Combo(['Never', 'Always', 'By Mesh Name'], default_value='Never', size=(15, 1), key="ignore_backface_secondary")],
+
+        [sg.Text('Self Occlusion.', size=(55, 1)),
+         sg.Combo(['Always', 'Only Same Mesh Name'], default_value='Only Same Mesh Name', size=(15, 1), key="self_occlusion")],
+
+        [sg.Text('Attenuation.', size=(55, 1)),
+         sg.Combo(['None', 'Smooth', 'Linear'], default_value='Linear', size=(15, 1), key="attenuation")],
+
+        [sg.Text('Ground Plane', size=(55, 1)),
          sg.Checkbox('Enable Floor', default=True, size=(15, 1), key="enable_ground_plane")],
 
-        [sg.Text('Floor Offset.', size=(55, 1)),
+        [sg.Text('Ground Plane Offset.', size=(55, 1)),
          sg.Input(default_text = "0", size=(20,15), key="ground_offset")], # STRING
 
         # Buttons
@@ -134,7 +163,7 @@ def main():
                                     res.append(clean_line)
 
                             for node in res:
-                                # Generate parameters
+                                # General parameters
                                 args = str(config['locations']['sub_auto_tool'])
                                 args += str("sbsbaker.exe ambient-occlusion-from-mesh") # File
                                 args += ' --inputs "' + str(file_path) +'"' # Mesh files to process. This option is implicit, so you can just provide a list of files at the end of your arguments, they will be interpreted as inputs.
@@ -156,15 +185,6 @@ def main():
                                 args += ' --average-normals ' + str(values['average_normals']).lower() # Interpret the Occluder Distance as a factor of the mesh bounding box.
                                 args += ' --ignore-backface ' + str(values['ignore_backface']).lower() # Interpret the Occluder Distance as a factor of the mesh bounding box.
 
-                                args += ' --name-suffix-high ' + str(values['name_suffix_high']) # High Poly name suffix.
-                                args += ' --name-suffix-low ' + str(values['name_suffix_low']) # Low Poly name suffix.
-                                args += ' --output-format ' + str(values['output_format']) # Format to use for output image file.
-
-                                output_path = values['output_path'];
-                                if (output_path == '/'):
-                                    output_path = os.path.join(file_path, '..')
-                                args += ' --output-path "' + str(output_path) + '"'# Set the output path for the generated files. By default the output path is the current directory.
-
                                 antialiasings = {
                                     'None': 0,
                                     'Subsampling 2x2': 1,
@@ -174,14 +194,68 @@ def main():
                                 antialiasing = antialiasings.get(values['antialiasing'], 0)
                                 args += ' --antialiasing ' + str(antialiasing) # Antialiasing method.
 
+                                match = {
+                                    'Always': 0,
+                                    'By Mesh Name': 1,
+                                }
+                                match = match.get(values['match'], 0)
+                                args += ' --match ' + str(match) # Antialiasing method.
+
+                                args += ' --name-suffix-low ' + str(values['name_suffix_low']) # Low Poly name suffix.
+                                args += ' --name-suffix-high ' + str(values['name_suffix_high']) # High Poly name suffix.
+
+                                # Ambient Occlusion Parameters
+                                args += ' --nb-second-rays ' + str(int(values['secondary_rays'])) # Number of secondary rays (in [1; 256]).
+                                args += ' --min-dist ' + str(values['min_occluder_distance']) # Minimum Occluder Distance (bias).
+                                args += ' --max-rear ' + str(values['max_occluder_distance']) # Minimum Occluder Distance (bias).
+                                args += ' --relative-to-bbox ' + str(values['relative_to_bbox']).lower() # Interpret the max distances as a factor of the mesh bounding box.
+                                args += ' --spread-angle ' + str(values['spread_angle']) # Maximum spread angle of occlusion rays.
+
+                                ray_distrib = {
+                                    'Uniform': 0,
+                                    'Cosine': 1,
+                                }
+                                ray_distrib = ray_distrib.get(values['ray_distrib'], 0)
+                                args += ' --ray-distrib ' + str(ray_distrib) # Angular Distribution of Occlusion Rays. (0='Uniform', 1='Cosine')
+
+                                ignore_backface_secondary = {
+                                    'Never': 0,
+                                    'Always': 1,
+                                    'By Mesh Name': 2,
+                                }
+                                ignore_backface_secondary = ignore_backface_secondary.get(values['ignore_backface_secondary'], 0)
+                                args += ' --ignore-backface-secondary ' + str(ignore_backface_secondary) # Angular Distribution of Occlusion Rays. (0='Uniform', 1='Cosine')
+
+                                self_occlusion = {
+                                    'Always': 0,
+                                    'Only Same Mesh Name': 1,
+                                }
+                                self_occlusion = self_occlusion.get(values['self_occlusion'], 0)
+                                args += ' --self-occlusion ' + str(self_occlusion) # Choose what geometry will cause occlusion. (0='Always', 1='Only Same Mesh Name')
+
+                                attenuation = {
+                                    'None': 0,
+                                    'Smooth': 1,
+                                    'Linear': 2,
+                                }
+                                attenuation = attenuation.get(values['attenuation'], 0)
+                                args += ' --ignore-backface-secondary ' + str(attenuation) # How occlusion is attenuated by occluder distance (0='None', 1='Smooth', 2='Linear')
+
                                 args += ' --enable-ground-plane ' + str(values['enable_ground_plane']).lower() # If enabled, adds an infinite plane under the baked mesh.
                                 args += ' --ground-offset ' + str(values['ground_offset']) # Offset of the ground plane from the mesh lowest point.
 
+                                # Misc
+                                args += ' --use-lowdef-as-highdef true' # Skip scene request
 
-                                # --self-occlusion
+                                # --Output
                                 args += ' --output-name mat_' + node + '_ambient_occlusion' # Nodename
                                 args += ' --input-selection ' + node # Nodename
-                                args += ' --use-lowdef-as-highdef true' # Skip scene request
+                                args += ' --output-format ' + str(values['output_format']) # Format to use for output image file.
+
+                                output_path = values['output_path'];
+                                if (output_path == '/'):
+                                    output_path = os.path.join(file_path, '..')
+                                args += ' --output-path "' + str(output_path) + '"'# Set the output path for the generated files. By default the output path is the current directory.
 
                                 print('Exported ' + node)
 
@@ -189,6 +263,8 @@ def main():
                                 subprocess.Popen(args)
             else:
                 sg.popup_error('Please select a valid folder')
+
+            print('Done')
 
     window.Close()   # Don't forget to close your window!
 
