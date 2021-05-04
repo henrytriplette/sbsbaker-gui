@@ -116,8 +116,10 @@ def main():
                 [sg.Cancel(key='quit')],
             ]
 
-    window = sg.Window('Sbsbaker Utility - 0.01 Alpha', layout)
+    window = sg.Window('Sbsbaker Utility - 0.12 Alpha', layout)
 
+    # Processes
+    processes = []
 
     while (True):
 
@@ -161,6 +163,7 @@ def main():
                                 if line.find('Entity') != -1:
                                     clean_line = line.replace('  Entity "', '').replace('":', '')
                                     res.append(clean_line)
+                                    sg.Print(' Found: ' + clean_line)
 
                             for node in res:
                                 # General parameters
@@ -257,16 +260,26 @@ def main():
                                     output_path = os.path.join(file_path, '..')
                                 args += ' --output-path "' + str(output_path) + '"'# Set the output path for the generated files. By default the output path is the current directory.
 
-                                print('Exported ' + node)
+                                sg.Print('Processing ' + node)
 
                                 # print(args)
-                                subprocess.Popen(args)
+                                rendering = subprocess.Popen(args)
+                                processes.append(rendering) # Append process to queque
+
+                                rendering.wait() # Hold on till process is finished
+
+                                sg.Print('- Exported ' + node)
+
             else:
                 sg.popup_error('Please select a valid folder')
 
-            print('Done')
+            sg.Print('Done Exporting')
 
     window.Close()   # Don't forget to close your window!
+
+    # Kill all processes
+    for process in processes:
+        process.kill()
 
 if __name__ == '__main__':
     main()
