@@ -261,7 +261,10 @@ def main():
 
                                 output_path = values['output_path'];
                                 if (output_path == '/'):
-                                    output_path = os.path.join(file_path, '..')
+                                    output_path = os.path.join(file_path, '../ao_gen')
+
+                                    if not os.path.exists(output_path):
+                                        os.makedirs(output_path)
                                 args += ' --output-path "' + str(output_path) + '"'# Set the output path for the generated files. By default the output path is the current directory.
 
                                 sg.Print('Processing ' + node)
@@ -277,7 +280,7 @@ def main():
             else:
                 sg.popup_error('Please select a valid folder')
 
-            sg.Print('Done Exporting')
+            sg.Print('Done Exporting', text_color='white', background_color='green', font='Courier 10')
 
     window.Close()   # Don't forget to close your window!
 
