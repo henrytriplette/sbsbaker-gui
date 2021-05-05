@@ -19,8 +19,14 @@ def main():
         [sg.Text('Output format', size=(55, 1)),
          sg.Combo(['surface', 'dds', 'bmp', 'jpg', 'jif', 'jpeg', 'jpe', 'png', 'tga', 'targa', 'tif', 'tiff', 'wap', 'wbmp', 'wbm', 'psd', 'psb', 'hdr', 'exr', 'webp'], default_value='jpg', size=(15, 1), key="output_format")],
 
-        # Common Parameters
+        # Buttons
         [sg.Text('                  ', size=(55, 2))],
+        [sg.Button('Start processing folder', size=(25, 1), key='utility_RunSbsbaker')]
+    ]
+
+    general_panel = [
+
+        # Common Parameters
         [sg.Text('Common Parameters.', size=(55, 1))],
 
         [sg.Text('Output Size', size=(55, 1)),
@@ -60,10 +66,11 @@ def main():
          sg.Input(default_text = "_high", size=(20,15), key="name_suffix_high")], # STRING
 
         [sg.Text('Ignore backface suffix', size=(55, 1)),
-         sg.Input(default_text = "_ignorebf", size=(20,15), key="name_suffix_ignore_backface")], # STRING
+         sg.Input(default_text = "_ignorebf", size=(20,15), key="name_suffix_ignore_backface")] # STRING
+    ]
 
+    ao_panel = [
          # ambient-occlusion options
-        [sg.Text('                  ', size=(55, 2))],
         [sg.Text('# Ambient occlusion options.', size=(55, 2))],
 
         [sg.Text('Secondary Rays', size=(55, 1)),
@@ -97,12 +104,7 @@ def main():
          sg.Checkbox('Enable Floor', default=True, size=(15, 1), key="enable_ground_plane")],
 
         [sg.Text('Ground Plane Offset.', size=(55, 1)),
-         sg.Input(default_text = "0", size=(20,15), key="ground_offset")], # STRING
-
-        # Buttons
-        [sg.Text('                  ', size=(55, 2))],
-        [sg.Button('Start processing folder', size=(25, 1), key='utility_RunSbsbaker')],
-
+         sg.Input(default_text = "0", size=(20,15), key="ground_offset")] # STRING
     ]
 
     layout = [
@@ -110,6 +112,8 @@ def main():
                     [
                         [
                         sg.Tab('Sbsbaker Utility', main_panel, tooltip='Sbsbaker Utility'),
+                        sg.Tab('General Parameters', general_panel, tooltip='General Parameters'),
+                        sg.Tab('Ambient Occlusion', ao_panel, tooltip='Ambient Occlusion'),
                         ]
                     ])
                 ],
