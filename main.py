@@ -1,11 +1,26 @@
 import PySimpleGUI as sg
 import configparser
 import subprocess
+import json
 import os
 
 # Read Configuration
 config = configparser.ConfigParser()
 config.read('config.ini')
+
+# Read settings, create defaults if missing
+if os.path.isfile('settings.json'):
+    with open('settings.json') as json_file:
+        defaults = json.load(json_file)
+
+else:
+    defaults = {}
+    defaults['settings'] = []
+
+    defaults['settings'].append({'resolution': '1024', 'dilation_width': 32.0, 'apply_diffusion': False, 'max_frontal': 0.01, 'max_rear': 0.01, 'max_dist_relative_scale': True, 'average_normals': True, 'ignore_backface': True, 'antialiasing': 'Subsampling 4x4', 'match': 'Always', 'name_suffix_low': '_low', 'name_suffix_high': '_high', 'secondary_rays': 64.0, 'min_occluder_distance': 0.0001, 'max_occluder_distance': 1.0, 'relative_to_bbox': True, 'spread_angle': 180.0, 'ray_distrib': 'Cosine', 'ignore_backface_secondary': 'Never', 'self_occlusion': 'Only Same Mesh Name', 'attenuation': 'Linear', 'enable_ground_plane': True, 'ground_offset': '0', 'output_format': 'jpg'})
+
+    with open('settings.json', 'w') as outfile:
+        json.dump(defaults, outfile, indent=4)
 
 def main():
 
@@ -21,7 +36,10 @@ def main():
 
         # Buttons
         [sg.Text('                  ', size=(55, 2))],
-        [sg.Button('Start processing folder', size=(25, 1), key='utility_RunSbsbaker')]
+        [sg.Button('Start processing folder', size=(25, 1), key='utility_RunSbsbaker')],
+
+        [sg.Text('                  ', size=(55, 2))],
+        [sg.Button('Export Settings', size=(25, 1), key='utility_exportSettings')]
     ]
 
     general_panel = [
@@ -135,6 +153,41 @@ def main():
 
         if event == 'quit':
             break
+
+        # Export settings
+        if event == 'utility_exportSettings':
+            data = {}
+            data['settings'] = []
+
+            data['settings'].append({
+                'resolution': values['resolution'],
+                'dilation_width': values['dilation_width'],
+                'apply_diffusion': values['apply_diffusion'],
+                'max_frontal': values['max_frontal'],
+                'max_rear': values['max_rear'],
+                'max_dist_relative_scale': values['max_dist_relative_scale'],
+                'average_normals': values['average_normals'],
+                'ignore_backface': values['ignore_backface'],
+                'antialiasing': values['antialiasing'],
+                'match': values['match'],
+                'name_suffix_low': values['name_suffix_low'],
+                'name_suffix_high': values['name_suffix_high'],
+                'secondary_rays': values['secondary_rays'],
+                'min_occluder_distance': values['min_occluder_distance'],
+                'max_occluder_distance': values['max_occluder_distance'],
+                'relative_to_bbox': values['relative_to_bbox'],
+                'spread_angle': values['spread_angle'],
+                'ray_distrib': values['ray_distrib'],
+                'ignore_backface_secondary': values['ignore_backface_secondary'],
+                'self_occlusion': values['self_occlusion'],
+                'attenuation': values['attenuation'],
+                'enable_ground_plane': values['enable_ground_plane'],
+                'ground_offset': values['ground_offset'],
+                'output_format': values['output_format'],
+            })
+
+            with open('settings.json', 'w') as outfile:
+                json.dump(data, outfile, indent=4)
 
         # Vpype Flow Imager
         if event == 'utility_RunSbsbaker':

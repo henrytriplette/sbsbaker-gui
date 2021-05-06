@@ -1,0 +1,30 @@
+{
+    "settings": [
+        {
+            "resolution": "2048",
+            "dilation_width": 32.0,
+            "apply_diffusion": false,
+            "max_frontal": 0.01,
+            "max_rear": 0.01,
+            "max_dist_relative_scale": true,
+            "average_normals": true,
+            "ignore_backface": true,
+            "antialiasing": "Subsampling 4x4",
+            "match": "Always",
+            "name_suffix_low": "_low",
+            "name_suffix_high": "_high",
+            "secondary_rays": 64.0,
+            "min_occluder_distance": 0.0001,
+            "max_occluder_distance": 1.0,
+            "relative_to_bbox": true,
+            "spread_angle": 180.0,
+            "ray_distrib": "Cosine",
+            "ignore_backface_secondary": "Never",
+            "self_occlusion": "Only Same Mesh Name",
+            "attenuation": "Linear",
+            "enable_ground_plane": true,
+            "ground_offset": "0",
+            "output_format": "jpg"
+        }
+    ]
+}
