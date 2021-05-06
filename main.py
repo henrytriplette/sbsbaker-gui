@@ -9,22 +9,25 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 # Read settings, create defaults if missing
+default_jsons = {}
 if os.path.isfile('settings.json'):
     with open('settings.json') as json_file:
-        defaults = json.load(json_file)
+        default_jsons = json.load(json_file)
 
 else:
-    defaults = {}
-    defaults['settings'] = []
+    default_jsons['settings'] = []
 
-    defaults['settings'].append({'resolution': '1024', 'dilation_width': 32.0, 'apply_diffusion': False, 'max_frontal': 0.01, 'max_rear': 0.01, 'max_dist_relative_scale': True, 'average_normals': True, 'ignore_backface': True, 'antialiasing': 'Subsampling 4x4', 'match': 'Always', 'name_suffix_low': '_low', 'name_suffix_high': '_high', 'secondary_rays': 64.0, 'min_occluder_distance': 0.0001, 'max_occluder_distance': 1.0, 'relative_to_bbox': True, 'spread_angle': 180.0, 'ray_distrib': 'Cosine', 'ignore_backface_secondary': 'Never', 'self_occlusion': 'Only Same Mesh Name', 'attenuation': 'Linear', 'enable_ground_plane': True, 'ground_offset': '0', 'output_format': 'jpg'})
+    default_jsons['settings'].append({'resolution': '1024', 'dilation_width': 32.0, 'apply_diffusion': False, 'max_frontal': 0.01, 'max_rear': 0.01, 'max_dist_relative_scale': True, 'average_normals': True, 'ignore_backface': True, 'antialiasing': 'Subsampling 4x4', 'match': 'Always', 'name_suffix_low': '_low', 'name_suffix_high': '_high', 'name_suffix_ignore_backface': '_ignorebf', 'secondary_rays': 64.0, 'min_occluder_distance': 0.0001, 'max_occluder_distance': 1.0, 'relative_to_bbox': True, 'spread_angle': 180.0, 'ray_distrib': 'Cosine', 'ignore_backface_secondary': 'Never', 'self_occlusion': 'Only Same Mesh Name', 'attenuation': 'Linear', 'enable_ground_plane': True, 'ground_offset': '0', 'output_format': 'jpg'})
 
     with open('settings.json', 'w') as outfile:
-        json.dump(defaults, outfile, indent=4)
+        json.dump(default_jsons, outfile, indent=4)
 
 def main():
 
     sg.theme('Topanga')
+
+    # Get defaults
+    default_json = default_jsons["settings"][0]
 
     main_panel = [
         [sg.Text('Input Folder', size=(15, 1)), sg.Input(key='inputMainPanelMeshFolder'), sg.FolderBrowse(target=('inputMainPanelMeshFolder'))],
@@ -48,43 +51,43 @@ def main():
         [sg.Text('Common Parameters.', size=(55, 1))],
 
         [sg.Text('Output Size', size=(55, 1)),
-         sg.Combo(['512', '1024', '2048', '4096'], default_value='1024', size=(15, 1), key="resolution")],
+         sg.Combo(['512', '1024', '2048', '4096'], default_value=default_json['resolution'], size=(15, 1), key="resolution")],
 
         [sg.Text('Dilation Width', size=(55, 1)),
-         sg.Slider(range=(1,100), default_value=32, size=(20,15), orientation='horizontal', key="dilation_width")], # INTEGER
+         sg.Slider(range=(1,100), default_value=default_json['dilation_width'], size=(20,15), orientation='horizontal', key="dilation_width")], # INTEGER
 
         [sg.Text('Apply Diffusion', size=(55, 1)),
-         sg.Checkbox('Apply Diffusion', default=False, size=(15, 1), key="apply_diffusion")],
+         sg.Checkbox('Apply Diffusion', default=default_json['apply_diffusion'], size=(15, 1), key="apply_diffusion")],
 
         [sg.Text('Max Frontal Distance', size=(55, 1)),
-         sg.Slider(range=(0.00,1.00), resolution=0.01, default_value=0.01, size=(20,15), orientation='horizontal', key="max_frontal")], # INTEGER
+         sg.Slider(range=(0.00,1.00), resolution=0.01, default_value=default_json['max_frontal'], size=(20,15), orientation='horizontal', key="max_frontal")], # INTEGER
 
         [sg.Text('Max Rear Distance', size=(55, 1)),
-         sg.Slider(range=(0.00,1.00), resolution=0.01, default_value=0.01, size=(20,15), orientation='horizontal', key="max_rear")], # INTEGER
+         sg.Slider(range=(0.00,1.00), resolution=0.01, default_value=default_json['max_rear'], size=(20,15), orientation='horizontal', key="max_rear")], # INTEGER
 
         [sg.Text('Relative to Bounding Box', size=(55, 1)),
-         sg.Checkbox('Relative to Bounding Box', default=True, size=(15, 1), key="max_dist_relative_scale")],
+         sg.Checkbox('Relative to Bounding Box', default=default_json['max_dist_relative_scale'], size=(15, 1), key="max_dist_relative_scale")],
 
         [sg.Text('Average Normals', size=(55, 1)),
-         sg.Checkbox('Average Normals', default=True, size=(15, 1), key="average_normals")],
+         sg.Checkbox('Average Normals', default=default_json['average_normals'], size=(15, 1), key="average_normals")],
 
         [sg.Text('Ignore Backface', size=(55, 1)),
-         sg.Checkbox('Ignore Backface', default=True, size=(15, 1), key="ignore_backface")],
+         sg.Checkbox('Ignore Backface', default=default_json['ignore_backface'], size=(15, 1), key="ignore_backface")],
 
         [sg.Text('Antialiasing method.', size=(55, 1)),
-         sg.Combo(['None', 'Subsampling 2x2', 'Subsampling 4x4', 'Subsampling 8x8'], default_value='Subsampling 4x4', size=(15, 1), key="antialiasing")],
+         sg.Combo(['None', 'Subsampling 2x2', 'Subsampling 4x4', 'Subsampling 8x8'], default_value=default_json['antialiasing'], size=(15, 1), key="antialiasing")],
 
         [sg.Text('Match.', size=(55, 1)),
-         sg.Combo(['Always', 'By Mesh Name'], default_value='Always', size=(15, 1), key="match")],
+         sg.Combo(['Always', 'By Mesh Name'], default_value=default_json['match'], size=(15, 1), key="match")],
 
         [sg.Text('Low Poly name suffix.', size=(55, 1)),
-         sg.Input(default_text = "_low", size=(20,15), key="name_suffix_low")], # STRING
+         sg.Input(default_text = default_json['name_suffix_low'], size=(20,15), key="name_suffix_low")], # STRING
 
         [sg.Text('High Poly name suffix', size=(55, 1)),
-         sg.Input(default_text = "_high", size=(20,15), key="name_suffix_high")], # STRING
+         sg.Input(default_text = default_json['name_suffix_high'], size=(20,15), key="name_suffix_high")], # STRING
 
         [sg.Text('Ignore backface suffix', size=(55, 1)),
-         sg.Input(default_text = "_ignorebf", size=(20,15), key="name_suffix_ignore_backface")] # STRING
+         sg.Input(default_text = default_json['name_suffix_ignore_backface'], size=(20,15), key="name_suffix_ignore_backface")] # STRING
     ]
 
     ao_panel = [
@@ -92,37 +95,37 @@ def main():
         [sg.Text('# Ambient occlusion options.', size=(55, 2))],
 
         [sg.Text('Secondary Rays', size=(55, 1)),
-         sg.Slider(range=(1,256), resolution=1, default_value=64, size=(20,15), orientation='horizontal', key="secondary_rays")], # INTEGER
+         sg.Slider(range=(1,256), resolution=1, default_value=default_json['secondary_rays'], size=(20,15), orientation='horizontal', key="secondary_rays")], # INTEGER
 
         [sg.Text('Min Occluder Distance', size=(55, 1)),
-         sg.Slider(range=(0.00,1.00), resolution=0.0001, default_value=0.0001, size=(20,15), orientation='horizontal', key="min_occluder_distance")], # INTEGER
+         sg.Slider(range=(0.00,1.00), resolution=0.0001, default_value=default_json['min_occluder_distance'], size=(20,15), orientation='horizontal', key="min_occluder_distance")], # INTEGER
 
         [sg.Text('Max Occluder Distance', size=(55, 1)),
-         sg.Slider(range=(0.00,1.00), resolution=0.01, default_value=1, size=(20,15), orientation='horizontal', key="max_occluder_distance")], # INTEGER
+         sg.Slider(range=(0.00,1.00), resolution=0.01, default_value=default_json['max_occluder_distance'], size=(20,15), orientation='horizontal', key="max_occluder_distance")], # INTEGER
 
         [sg.Text('Relative to Bounding Box', size=(55, 1)),
-         sg.Checkbox('Relative to Bounding Box', default=True, size=(15, 1), key="relative_to_bbox")],
+         sg.Checkbox('Relative to Bounding Box', default=default_json['relative_to_bbox'], size=(15, 1), key="relative_to_bbox")],
 
         [sg.Text('Spread angle', size=(55, 1)),
-         sg.Slider(range=(0,256), resolution=1, default_value=180, size=(20,15), orientation='horizontal', key="spread_angle")], # INTEGER
+         sg.Slider(range=(0,256), resolution=1, default_value=default_json['spread_angle'], size=(20,15), orientation='horizontal', key="spread_angle")], # INTEGER
 
         [sg.Text('Angular Distribution of Occlusion Rays.', size=(55, 1)),
-         sg.Combo(['Uniform', 'Cosine'], default_value='Cosine', size=(15, 1), key="ray_distrib")],
+         sg.Combo(['Uniform', 'Cosine'], default_value=default_json['ray_distrib'], size=(15, 1), key="ray_distrib")],
 
         [sg.Text('Ignore Backface.', size=(55, 1)),
-         sg.Combo(['Never', 'Always', 'By Mesh Name'], default_value='Never', size=(15, 1), key="ignore_backface_secondary")],
+         sg.Combo(['Never', 'Always', 'By Mesh Name'], default_value=default_json['ignore_backface_secondary'], size=(15, 1), key="ignore_backface_secondary")],
 
         [sg.Text('Self Occlusion.', size=(55, 1)),
-         sg.Combo(['Always', 'Only Same Mesh Name'], default_value='Only Same Mesh Name', size=(15, 1), key="self_occlusion")],
+         sg.Combo(['Always', 'Only Same Mesh Name'], default_value=default_json['self_occlusion'], size=(15, 1), key="self_occlusion")],
 
         [sg.Text('Attenuation.', size=(55, 1)),
-         sg.Combo(['None', 'Smooth', 'Linear'], default_value='Linear', size=(15, 1), key="attenuation")],
+         sg.Combo(['None', 'Smooth', 'Linear'], default_value=default_json['attenuation'], size=(15, 1), key="attenuation")],
 
         [sg.Text('Ground Plane', size=(55, 1)),
-         sg.Checkbox('Enable Floor', default=True, size=(15, 1), key="enable_ground_plane")],
+         sg.Checkbox('Enable Floor', default=default_json['enable_ground_plane'], size=(15, 1), key="enable_ground_plane")],
 
         [sg.Text('Ground Plane Offset.', size=(55, 1)),
-         sg.Input(default_text = "0", size=(20,15), key="ground_offset")] # STRING
+         sg.Input(default_text = default_json['ground_offset'], size=(20,15), key="ground_offset")] # STRING
     ]
 
     layout = [
@@ -172,6 +175,7 @@ def main():
                 'match': values['match'],
                 'name_suffix_low': values['name_suffix_low'],
                 'name_suffix_high': values['name_suffix_high'],
+                'name_suffix_ignore_backface': values['name_suffix_ignore_backface'],
                 'secondary_rays': values['secondary_rays'],
                 'min_occluder_distance': values['min_occluder_distance'],
                 'max_occluder_distance': values['max_occluder_distance'],
